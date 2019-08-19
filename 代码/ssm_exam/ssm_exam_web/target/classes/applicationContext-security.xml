@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--指定路径,不需要权限认证-->
+    <security:http pattern="/login.jsp" security="none"></security:http>
+    <security:http pattern="/css/**" security="none"></security:http>
+    <security:http pattern="/images/**" security="none"></security:http>
+    <security:http pattern="/img/**" security="none"></security:http>
+    <security:http pattern="/plugins/**" security="none"></security:http>
+
+    <!--对http请求进行权限认证
+        auto-config : 是否开启自动配置
+        use-expressions : 是否使用表达式
+    -->
+    <security:http auto-config="true" use-expressions="false">
+        <!--配置拦截路径
+            pattern : 拦截路径   /* 拦截一级目录   /** 拦截目录以及其子目录下所有路径   /user/findAll
+            access  : 路径需要什么样的角色可以访问 ,必须以ROLE_开头  ROLE_*
+        -->
+        <security:intercept-url pattern="/**" access="ROLE_USER,ROLE_ADMIN"></security:intercept-url>
+
+        <!--配置使用自定义页面
+            login-page : 指定登录页面
+            login-processing-url : 指定登录路径  默认 :  /login
+            username-parameter : 指定登录用户名参数名称  默认: username
+            password-parameter : 指定登录密码参数名称  默认 : password
+            default-target-url : 指定登录成功默认跳转页面
+            authentication-success-forward-url : 认证成功之后的跳转路径
+            authentication-failure-forward-url : 认证失败之后的跳转路径
+        -->
+        <security:form-login
+                login-page="/login.jsp"
+                login-processing-url="/login"
+                username-parameter="username"
+                password-parameter="password"
+                default-target-url="/permission/findMenus"
+                authentication-success-forward-url="/permission/findMenus"
+                authentication-failure-forward-url="/login.jsp"></security:form-login>
+
+        <!--禁用跨服务器资源拦截-->
+        <security:csrf disabled="true"></security:csrf>
+
+        <!--配置退出登录
+            logout-url : 配置退出登录的路径  默认 : logout
+            logout-success-url : 退出登录成功跳转的地址
+            invalidate-session  : 是否销毁session
+        -->
+        <security:logout logout-url="/logout" logout-success-url="/login.jsp" invalidate-session="true"></security:logout>
+    </security:http>
+
+    <!--配置认证管理器-->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userServiceImpl">
+            <!--配置用户服务-->
+           <!-- <security:user-service>-->
+                <!-- 查询自己的数据区,获取用户名和密码信息 -->
+                <!--自己定义一些用户信息
+                <security:user name="yangguo" password="123" authorities="ROLE_USER"></security:user>
+                <security:user name="xiaolongnv" password="456" authorities="ROLE_ADMIN"></security:user>
+                -->
+            <!--</security:user-service>-->
+
+            <!--配置密码加密器-->
+           <security:password-encoder ref="passwordEncoder"></security:password-encoder>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!--密码加密器-->
+  <!-- <bean id="passwordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"></bean>-->
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+
+</beans>

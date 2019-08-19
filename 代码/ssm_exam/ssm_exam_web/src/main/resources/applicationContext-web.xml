@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--配置组件扫描-->
+    <context:component-scan base-package="com.itheima.controller"></context:component-scan>
+    <!--视图解析器-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/pages/" ></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!--释放静态资源-->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <!--开启注解支持-->
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+
+    <!--配置AOP-->
+    <aop:config>
+        <aop:pointcut id="logAop" expression="execution(* com.itheima.controller.*.*(..))"></aop:pointcut>
+        <aop:aspect id="logAspect" ref="sysLogAop">
+            <!--配置通知-->
+            <aop:before method="beforeLog" pointcut-ref="logAop"></aop:before>
+            <aop:after-returning method="afterReturningLog" pointcut-ref="logAop"></aop:after-returning>
+        </aop:aspect>
+    </aop:config>
+    <!--
+        Spring AOP 的底层动态代理 , 所使用的动态代理的技术  JDK PROXY    CGLIB Proxy
+        JDK PROXY : 基于接口的动态代理技术 , 要是有的话必须目标类实现了接口 , 产生的代理对象和目标对象实现了相同接口
+        CGLIB PROXY : 基于类的动态代理技术 , 目标类有没有实现接口都可以使用 , 产生的代理对象是目标对象的子类
+
+        proxy-target-class="true"  : 使用基于CGLIB的动态代理技术
+    -->
+    <!--<aop:aspectj-autoproxy proxy-target-class="true"></aop:aspectj-autoproxy>-->
+
+</beans>
